@@ -4,9 +4,23 @@
 #include <string>
 #include <sstream>
 
+
 class CPU6502
 {
+	// Address Resolution struct is needed because
+	// some instructions have direct access to
+	// memory. Therefor the affected address has
+	// to be passed.
+	struct AddrRes
+	{
+		mem_t value;
+		uint16_t addr;
+		bool addr_set;
+	};
+
 public:
+	typedef uint8_t mem_t;
+
 	enum OpCodes
 	{                                 // len | time
 		ADC_IMMEDIATE   = 0x69,   //  2     2
@@ -95,7 +109,7 @@ public:
 
 	void beat()
 	{
-		const uint8_t instr = mem_read_next_pc();
+		const mem_t instr = mem_read_next_pc();
 		exec(instr);
 	}
 
@@ -182,47 +196,23 @@ private:
 
 	/* instructions ************************************************************/
 
-	void inst_adc(uint8_t val)
+	void inst_adc(const AddrRes &addrres)
 	{
-		if(reg_a() & val & 0x80)
-		{
-			carry_flag(true);
-			overflow_flag(true); // TODO: not sure if this is correct
-		}
-		else
-		{
-			carry_flag(false);
-			overflow_flag(false); // TODO: not sure if this is correct
+		carry_flag(reg_a() & addrres.value & 0x80);
+		overflow_flag(reg_a() & addrres.value & 0x80);
 
-		}
-
-		reg_a(reg_a() + val);
+		reg_a(reg_a() + addres.value);
 		
-		if(reg_a() == 0)
-			zero_flag(true);
-		else
-			zero_flag(false);
-
-		if(reg_a() & 0x80)
-			negative_flag(true);
-		else
-			negative_flag(false);
+		zero_flag(reg_a() == 0);
+		negative_flag(reg_a() & 0x80);
 	}
 
-	void inst_and(uint8_t val)
+	void inst_and(const AddrRes &addrres)
 	{
-		reg_a(reg_a() & val);
+		reg_a(reg_a() & addres.value);
 		
-		if(reg_a() == 0)
-			zero_flag(true);
-		else
-			zero_flag(false);
-
-		if(reg_a() & 0x80)
-			negative_flag(true);
-		else
-			negative_flag(false);
-
+		zero_flag(reg_a() == 0);
+		negative_flag(reg_a() & 0x80);
 	}
 
 	// performs shift operation on accumulator register
@@ -238,52 +228,97 @@ private:
 
 
 	// performs shift operation on memory
-	void inst_asl(uint8_t val)
+	void inst_asl(const AddrRes &addrres)
 	{
-		uint8_t mem =
 	}
 
 	/* value address resolution ************************************************/
 
 	// Argument is named aval because it no address and no value. Took both.
 
-	uint8_t immediate(uint8_t aval) const
-	{ return aval; }
+	AddrRes immediate(uint8_t aval) const
+	{
+		const AddrRes ar = {aval, 0, false};
+		return ar;
+	}
 
-	uint8_t zero_page(uint8_t aval) const
-	{ return mem_read(static_cast<uint16_t>(aval)); }
+	AddrRes zero_page(uint8_t aval) const
+	{
+		const mem_t mem = mem_read(aval);
+		const AddrRes ar = {mem, aval, true};
+		return ar;
+	}
 
-	uint8_t zero_page_x(uint8_t aval) const
-	{ return mem_read(static_cast<uint16_t(reg_x() + aval)); }
+	AddrRes zero_page_x(uint8_t aval) const
+	{
+		const uint16_t addr = reg_x() + aval;
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t zero_page_y(uint8_t aval) const
-	{ return mem_read(static_cast<uint16_t(reg_y() + aval)); }
+	AddrRes zero_page_y(uint8_t aval) const
+	{
+		const uint16_t addr = reg_y() + aval;
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t relative(uint8_t aval) const
-	{ return mem_read(pc() + aval); }
+	AddRes relative(uint8_t aval) const
+	{
+		const uint16_t addr = pc() + aval;
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t absolute(uint16_t aval) const
-	{ return mem_read(aval); }
+	AddRes absolute(uint16_t aval) const
+	{
+		const mem_t mem = mem_read(aval);
+		const AddrRes ar = {mem, aval, true};
+		return ar;
+	}
 
-	uint8_t absolute_x(uint16_t aval) const
-	{ return mem_read(aval + reg_x()); }
+	AddRes absolute_x(uint16_t aval) const
+	{
+		const uint16_t addr = aval + reg_x();
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t absolute_y(uint16_t aval) const
-	{ return mem_read(aval + reg_y()); }
+	AddRes absolute_y(uint16_t aval) const
+	{
+		const uint16_t addr = aval + reg_y();
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t indirect_x(uint8_t aval) const
-	{ return mem_read(mem_read(aval+reg_x())); }
+	AddRes indirect_x(uint8_t aval) const
+	{
+		const uint16_t addr = mem_read(aval+reg_x());
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
-	uint8_t indirect_y(uint8_t aval) const
-	{ return mem_read(mem_read(aval+reg_y())); }
+	AddRes indirect_y(uint8_t aval) const
+	{
+		const uint16_t addr = mem_read(aval+reg_y());
+		const mem_t mem = mem_read(addr);
+		const AddrRes ar = {mem, addr, true};
+		return ar;
+	}
 
 	/* memory access ***********************************************************/
 
 	// Read content from memory where pc is pointing to.
 	// Increment pc.
-	uint8_t mem_read_move_8()
+	mem_t mem_read_move_8()
 	{
-		const uint8_t mem = mem_read(pc());
+		const mem_t mem = mem_read(pc());
 		pc(pc()+1);
 		return mem;
 	}
@@ -296,30 +331,30 @@ private:
 		return mem;
 	}
 
-	uint8_t mem_read(uint16_t addr) const
+	mem_t mem_read(uint16_t addr) const
 	{ return memory.read(addr); }
 
-	void mem_write(uint16_t addr, uint8_t val)
+	void mem_write(uint16_t addr, mem_t val)
 	{ memory.write(addr, val); }
 
 	/* register access *********************************************************/
 
-	uint8_t reg_a() const
+	mem_t reg_a() const
 	{ return _reg_a; }
 
-	void reg_a(uint8_t val)
+	void reg_a(mem_t val)
 	{ _reg_a = val; }
 
-	uint8_t reg_y() const
+	mem_t reg_y() const
 	{ return _reg_y; }
 
-	void reg_y(uint8_t val)
+	void reg_y(mem_t val)
 	{ _reg_y = val; }
 
-	uint8_t reg_x() const
+	mem_t reg_x() const
 	{ return _reg_x; }
 
-	void reg_x(uint8_t val)
+	void reg_x(mem_t val)
 	{ _reg_x = val; }
 
 	uint16_t pc() const
@@ -389,9 +424,9 @@ private:
 	Memory &_memory;
 
 	// internal components
-	uint8_t  _reg_a;  // accumulator
-	uint8_t  _reg_y;  // index register
-	uint8_t  _reg_x;  // index register
+	mem_t  _reg_a;  // accumulator
+	mem_t  _reg_y;  // index register
+	mem_t  _reg_x;  // index register
 	uint16_t _pc;     // program counter
 	uint8_t  _sp;     // stack pointer
 	uint8_t  _reg_ps; // processor status register
