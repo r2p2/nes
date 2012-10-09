@@ -340,7 +340,7 @@ private:
 	void reg_ps(uint8_t val)
 	{ _reg_ps = val; }
 
-	/* processor status regist access ******************************************/
+	/* processor status register access ***************************************/
 	
 	bool carry_flag() const
 	{ return reg_ps() & 0x40; }
