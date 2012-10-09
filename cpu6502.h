@@ -16,7 +16,23 @@ public:
 		ADC_ABSOLUTE_X  = 0x7D,   //  3     4 (+1 if page crossed)
 		ADC_ABSOLUTE_Y  = 0x79,   //  3     4 (+1 if page crossed)
         	ADC_INDIRECT_X  = 0x61,   //  2     6
-		ADC_INDIRECT_Y  = 0x71,   //  2     5
+		ADC_INDIRECT_Y  = 0x71,   //  2     5 (+1 if page crossed)
+
+		AND_IMMEDIATE   = 0x29,   //  2     2
+		AND_ZERO_PAGE   = 0x25,   //  2     3
+		AND_ZERO_PAGE_X = 0x35,   //  2     4
+		AND_ABSOLUTE    = 0x2D,   //  3     4
+		AND_ABSOLUTE_X  = 0x3D,   //  3     4 (+1 if page crossed)
+		AND_ABSOLUTE_Y  = 0x39,   //  3     4 (+1 if page crossed)
+        	AND_INDIRECT_X  = 0x21,   //  2     6
+		AND_INDIRECT_Y  = 0x31,   //  2     5 (+1 if page crossed)
+
+		ASL_ACCUMULATOR = 0x0A,   //  1     2
+		ASL_ZERO_PAGE   = 0x06,   //  2     5
+		ASL_ZERO_PAGE_X = 0x16,   //  2     6
+		ASL_ABSOLUTE    = 0x0E,   //  3     6
+		ASL_ABSOLUTE_X  = 0x1E,   //  3     7
+
 	};
 
 	CPU6502(Memory &memory)
@@ -112,6 +128,54 @@ private:
 		case ADC_INDIRECT_Y:
 			inst_adc(indirect_y(mem_read_move_8()));
 			break;
+
+		/*******************************************************************/
+
+		case AND_IMMEDIATE:
+			inst_and(immediate(mem_read_move_8()));
+			break;
+		case AND_ZERO_PAGE:
+			inst_and(zero_page(mem_read_move_8()));
+			break;
+		case AND_ZERO_PAGE_X:
+			inst_and(zero_page_x(mem_read_move_8()));
+			break;
+		case AND_ABSOLUTE:
+			inst_and(absolute(mem_read_move_16()));
+			break;
+		case AND_ABSOLUTE_X:
+			inst_and(absolute_x(mem_read_move_16()));
+			break;
+		case AND_ABSOLUTE_Y:
+			inst_and(absolute_y(mem_read_move_16()));
+			break;
+        	case AND_INDIRECT_X:
+			inst_and(indexed_x(mem_read_move_8()));
+			break;
+		case AND_INDIRECT_Y:
+			inst_and(indirect_y(mem_read_move_8()));
+			break;
+
+		/*******************************************************************/
+
+		case ASL_ACCUMULATOR:
+			inst_asl();
+			break;
+		case ASL_ZERO_PAGE:
+			inst_asl(zero_page(mem_read_move_8()));
+			break;
+		case ASL_ZERO_PAGE_X:
+			inst_asl(zero_page_x(mem_read_move_8()));
+			break;
+		case ASL_ABSOLUTE:
+			inst_asl(absolute(mem_read_move_16()));
+			break;
+		case ASL_ABSOLUTE_X:
+			inst_asl(absolute_x(mem_read_move_16()));
+			break;
+
+
+
 		default:
 		}
 	}
@@ -122,27 +186,61 @@ private:
 	{
 		if(reg_a() & val & 0x80)
 		{
-			carry_flag(true)
-			overflow_flag(true) // TODO: not sure if this is correct
+			carry_flag(true);
+			overflow_flag(true); // TODO: not sure if this is correct
 		}
 		else
 		{
-			carry_flag(false)
-			overflow_flag(false) // TODO: not sure if this is correct
+			carry_flag(false);
+			overflow_flag(false); // TODO: not sure if this is correct
 
 		}
 
 		reg_a(reg_a() + val);
 		
 		if(reg_a() == 0)
-			zero_flag(true)
+			zero_flag(true);
 		else
-			zero_flag(false)
+			zero_flag(false);
 
 		if(reg_a() & 0x80)
-			negative_flag(true)
+			negative_flag(true);
 		else
-			negative_flag(false)
+			negative_flag(false);
+	}
+
+	void inst_and(uint8_t val)
+	{
+		reg_a(reg_a() & val);
+		
+		if(reg_a() == 0)
+			zero_flag(true);
+		else
+			zero_flag(false);
+
+		if(reg_a() & 0x80)
+			negative_flag(true);
+		else
+			negative_flag(false);
+
+	}
+
+	// performs shift operation on accumulator register
+	void inst_asl()
+	{
+		carry_flag(reg_a() & 0x80);
+
+		reg_a(reg_a() << 1 );
+
+		zero_flag(reg_a() == 0);
+		negative_flag(reg_a() & 0x80);
+	}
+
+
+	// performs shift operation on memory
+	void inst_asl(uint8_t val)
+	{
+		uint8_t mem =
 	}
 
 	/* value address resolution ************************************************/
