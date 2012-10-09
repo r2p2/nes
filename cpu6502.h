@@ -15,7 +15,7 @@ public:
 		ADC_ABSOLUTE    = 0x6D,   //  3     4
 		ADC_ABSOLUTE_X  = 0x7D,   //  3     4 (+1 if page crossed)
 		ADC_ABSOLUTE_Y  = 0x79,   //  3     4 (+1 if page crossed)
-        	ADC_INDIRECT_X  = 0x61,   //  2     6
+		ADC_INDIRECT_X  = 0x61,   //  2     6
 		ADC_INDIRECT_Y  = 0x71,   //  2     5 (+1 if page crossed)
 
 		AND_IMMEDIATE   = 0x29,   //  2     2
@@ -24,7 +24,7 @@ public:
 		AND_ABSOLUTE    = 0x2D,   //  3     4
 		AND_ABSOLUTE_X  = 0x3D,   //  3     4 (+1 if page crossed)
 		AND_ABSOLUTE_Y  = 0x39,   //  3     4 (+1 if page crossed)
-        	AND_INDIRECT_X  = 0x21,   //  2     6
+		AND_INDIRECT_X  = 0x21,   //  2     6
 		AND_INDIRECT_Y  = 0x31,   //  2     5 (+1 if page crossed)
 
 		ASL_ACCUMULATOR = 0x0A,   //  1     2
