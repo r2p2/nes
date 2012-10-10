@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 
+#include "memory.h"
 
 class CPU6502
 {
@@ -13,14 +14,12 @@ class CPU6502
 	// to be passed.
 	struct AddrRes
 	{
-		mem_t value;
+		Memory::mem_t value;
 		uint16_t addr;
 		bool addr_set;
 	};
 
 public:
-	typedef uint8_t mem_t;
-
 	enum OpCodes
 	{                                 // len | time
 		ADC_IMMEDIATE   = 0x69,   //  2     2
@@ -109,7 +108,7 @@ public:
 
 	void beat()
 	{
-		const mem_t instr = mem_read_next_pc();
+		const Memory::mem_t instr = mem_read_next_pc();
 		exec(instr);
 	}
 
@@ -244,7 +243,7 @@ private:
 
 	AddrRes zero_page(uint8_t aval) const
 	{
-		const mem_t mem = mem_read(aval);
+		const Memory::mem_t mem = mem_read(aval);
 		const AddrRes ar = {mem, aval, true};
 		return ar;
 	}
@@ -252,7 +251,7 @@ private:
 	AddrRes zero_page_x(uint8_t aval) const
 	{
 		const uint16_t addr = reg_x() + aval;
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -260,7 +259,7 @@ private:
 	AddrRes zero_page_y(uint8_t aval) const
 	{
 		const uint16_t addr = reg_y() + aval;
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -268,14 +267,14 @@ private:
 	AddRes relative(uint8_t aval) const
 	{
 		const uint16_t addr = pc() + aval;
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
 
 	AddRes absolute(uint16_t aval) const
 	{
-		const mem_t mem = mem_read(aval);
+		const Memory::mem_t mem = mem_read(aval);
 		const AddrRes ar = {mem, aval, true};
 		return ar;
 	}
@@ -283,7 +282,7 @@ private:
 	AddRes absolute_x(uint16_t aval) const
 	{
 		const uint16_t addr = aval + reg_x();
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -291,7 +290,7 @@ private:
 	AddRes absolute_y(uint16_t aval) const
 	{
 		const uint16_t addr = aval + reg_y();
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -299,7 +298,7 @@ private:
 	AddRes indirect_x(uint8_t aval) const
 	{
 		const uint16_t addr = mem_read(aval+reg_x());
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -307,7 +306,7 @@ private:
 	AddRes indirect_y(uint8_t aval) const
 	{
 		const uint16_t addr = mem_read(aval+reg_y());
-		const mem_t mem = mem_read(addr);
+		const Memory::mem_t mem = mem_read(addr);
 		const AddrRes ar = {mem, addr, true};
 		return ar;
 	}
@@ -316,9 +315,9 @@ private:
 
 	// Read content from memory where pc is pointing to.
 	// Increment pc.
-	mem_t mem_read_move_8()
+	Memory::mem_t mem_read_move_8()
 	{
-		const mem_t mem = mem_read(pc());
+		const Memory::mem_t mem = mem_read(pc());
 		pc(pc()+1);
 		return mem;
 	}
@@ -331,30 +330,30 @@ private:
 		return mem;
 	}
 
-	mem_t mem_read(uint16_t addr) const
+	Memory::mem_t mem_read(uint16_t addr) const
 	{ return memory.read(addr); }
 
-	void mem_write(uint16_t addr, mem_t val)
+	void mem_write(uint16_t addr, Memory::mem_t val)
 	{ memory.write(addr, val); }
 
 	/* register access *********************************************************/
 
-	mem_t reg_a() const
+	Memory::mem_t reg_a() const
 	{ return _reg_a; }
 
-	void reg_a(mem_t val)
+	void reg_a(Memory::mem_t val)
 	{ _reg_a = val; }
 
-	mem_t reg_y() const
+	Memory::mem_t reg_y() const
 	{ return _reg_y; }
 
-	void reg_y(mem_t val)
+	void reg_y(Memory::mem_t val)
 	{ _reg_y = val; }
 
-	mem_t reg_x() const
+	Memory::mem_t reg_x() const
 	{ return _reg_x; }
 
-	void reg_x(mem_t val)
+	void reg_x(Memory::mem_t val)
 	{ _reg_x = val; }
 
 	uint16_t pc() const
@@ -424,10 +423,10 @@ private:
 	Memory &_memory;
 
 	// internal components
-	mem_t  _reg_a;  // accumulator
-	mem_t  _reg_y;  // index register
-	mem_t  _reg_x;  // index register
-	uint16_t _pc;     // program counter
-	uint8_t  _sp;     // stack pointer
-	uint8_t  _reg_ps; // processor status register
+	Memory::mem_t  _reg_a;  // accumulator
+	Memory::mem_t  _reg_y;  // index register
+	Memory::mem_t  _reg_x;  // index register
+	uint16_t       _pc;     // program counter
+	uint8_t        _sp;     // stack pointer
+	uint8_t        _reg_ps; // processor status register
 };
