@@ -21,7 +21,7 @@ class CPU6502
 
 public:
 	enum OpCodes
-	{                                 // len | time
+	{                             // len | time
 		ADC_IMMEDIATE   = 0x69,   //  2     2
 		ADC_ZERO_PAGE   = 0x65,   //  2     3
 		ADC_ZERO_PAGE_X = 0x75,   //  2     4
