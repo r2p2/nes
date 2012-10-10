@@ -9,8 +9,8 @@ class Memory
 public:
 	class Handler
 	{
-		virtual void on_mem_read(uint16_t addr, uint16_t value) = 0;
-		virtual void on_mem_write(uint16_t addr, uint16_t value) = 0;
+		virtual void on_mem_read(uint16_t addr, mem_t value) = 0;
+		virtual void on_mem_write(uint16_t addr, mem_t value) = 0;
 	};
 
 	typedef uint8_t mem_t
