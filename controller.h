@@ -25,7 +25,9 @@ public:
 	, _index(0)
 	, _handler_active(false)
 	, _connected(false)
-	{}
+	{
+		_memory.reg_mem_handler(_contr_addr, this);
+	}
 
 	void press(Button btn_id)
 	{ _button[btn_id] = true; }
