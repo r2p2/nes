@@ -37,10 +37,8 @@ public:
 			_handlers[addr].on_mem_write(addr, value);
 	}
 
-	void reg_mem_read_handler(uint16_t addr, Handler *hdl)
-	{
-		_handlers[addr] = hdl;
-	}
+	void reg_mem_handler(uint16_t addr, Handler *hdl)
+	{ _handlers[addr] = hdl; }
 
 private:
 	std::vector<mem_t> _memory;
