@@ -7,13 +7,13 @@
 class Memory
 {
 public:
+	typedef uint8_t mem_t;
 	class Handler
 	{
 		virtual void on_mem_read(uint16_t addr, mem_t value) = 0;
 		virtual void on_mem_write(uint16_t addr, mem_t value) = 0;
 	};
 
-	typedef uint8_t mem_t
 
 	Memory(uint16_t size)
 	: _memory(0xFFFF, 0)
