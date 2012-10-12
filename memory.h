@@ -19,7 +19,7 @@ public:
 	: _memory(0xFFFF, 0)
 	{}
 
-	mem_t read(uint16_t addr) const
+	virtual mem_t read(uint16_t addr) const
 	{
 		const mem_t mem = _memory[addr];
 
@@ -29,7 +29,7 @@ public:
 		return mem;
 	}
 
-	void write(uint16_t addr, mem_t value)
+	virtual void write(uint16_t addr, mem_t value)
 	{
 		_memory[addr] = value;
 
