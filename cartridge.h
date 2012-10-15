@@ -35,36 +35,41 @@ public:
 		uint8_t byte;
 
 		is >> format;
-
+std::cout << "foo" << std::endl;
 		// TODO check format
 
 		is >> byte;
 		_rom.resize(16*byte, 0);
 
+std::cout << "foo" << std::endl;
 		is >> byte;
 		_vrom.resize(8*byte, 0);
 
+std::cout << "foo" << std::endl;
 		is >> byte;
-		_mirroring = byte & 0x01;
+		_mirroring = static_cast<Mirroring>(byte & 0x01);
 		_battery_backed_ram = byte & 0x02;
+std::cout << "foo" << std::endl;
 		if(byte & 0x04)
 			_trainer.resize(512, 0);
 		_four_screen_layout = byte & 0x08;
-		_memory_mapper = byte >> 4;
+		_memory_mapper = static_cast<MemoryMapper>(byte >> 4);
+std::cout << "foo" << std::endl;
 
 		is >> byte;
 		_vs_cartridge = byte & 0x01;
-		_memory_mapper |= byte & 0xF0;
+		_memory_mapper = static_cast<MemoryMapper>(_memory_mapper | byte & 0xF0);
+std::cout << "foo" << std::endl;
 		
 		is >> byte;
-		if(bytes == 0)
+		if(byte == 0)
 			_8k_ram_banks = 1;
 		else
-			_8k_ram_banks = bytes;
+			_8k_ram_banks = byte;
 
 		
 		is >> byte;
-		_display_format = byte & 0x01;
+		_display_format = static_cast<DisplayFormat>(byte & 0x01);
 
 		is >> byte;
 		is >> byte;
@@ -85,11 +90,12 @@ public:
 			_rom[i] = byte;
 		}
 
-		for(uint16_t i = 0; i < _vram.size(); ++i)
+		for(uint16_t i = 0; i < _vrom.size(); ++i)
 		{
 			is >> byte;
-			_vram[i] = byte;
+			_vrom[i] = byte;
 		}
+		std::cout << str() << std::endl;
 	}
 
 	std::string str() const
